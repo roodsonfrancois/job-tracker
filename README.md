@@ -1,9 +1,8 @@
 # Job Tracker
 
 Job Tracker is a simple, reliable desktop application for keeping job application
-records locally. This initial phase provides the cross-platform application shell,
-SQLite schema, and maintainable architecture; application-entry workflows will be
-added in a later phase.
+records locally. It provides local create, read, update, and delete workflows,
+status summaries, an offline SQLite database, and a maintainable desktop architecture.
 
 ## Technologies
 
@@ -59,6 +58,10 @@ Run the desktop application:
 ```bash
 python -m app.main
 ```
+
+Use **+ Add Application** to create a record. Select any row to inspect its full
+details or to edit or delete it. Dates are optional and, when provided, must use
+the `YYYY-MM-DD` format. Deletion always asks for confirmation.
 
 Run tests:
 

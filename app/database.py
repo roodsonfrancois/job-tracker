@@ -79,6 +79,43 @@ class JobApplicationRepository:
                 "SELECT * FROM job_applications ORDER BY created_at DESC, id DESC"
             ).fetchall()
 
+    def get_by_id(self, application_id: int) -> sqlite3.Row | None:
+        with closing(sqlite3.connect(self.database_path)) as connection:
+            connection.row_factory = sqlite3.Row
+            return connection.execute(
+                "SELECT * FROM job_applications WHERE id = ?", (application_id,)
+            ).fetchone()
+
+    def update(self, application_id: int, application: JobApplication) -> bool:
+        validate_status(application.status)
+        with closing(sqlite3.connect(self.database_path)) as connection:
+            cursor = connection.execute(
+                """
+                UPDATE job_applications
+                SET company = ?, position = ?, location = ?, job_url = ?,
+                    status = ?, date_applied = ?, follow_up_date = ?, notes = ?,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+                """,
+                (
+                    application.company, application.position, application.location,
+                    application.job_url, application.status,
+                    application.date_applied.isoformat() if application.date_applied else None,
+                    application.follow_up_date.isoformat() if application.follow_up_date else None,
+                    application.notes, application_id,
+                ),
+            )
+            connection.commit()
+            return cursor.rowcount == 1
+
+    def delete(self, application_id: int) -> bool:
+        with closing(sqlite3.connect(self.database_path)) as connection:
+            cursor = connection.execute(
+                "DELETE FROM job_applications WHERE id = ?", (application_id,)
+            )
+            connection.commit()
+            return cursor.rowcount == 1
+
     def summary(self) -> dict[str, int]:
         counts = {"Total": 0, "Applied": 0, "Interviews": 0, "Offers": 0}
         with closing(sqlite3.connect(self.database_path)) as connection:
