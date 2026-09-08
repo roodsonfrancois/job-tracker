@@ -1,70 +1,90 @@
 # Job Tracker
 
-Job Tracker is a simple, reliable desktop application for keeping job application
-records locally. It provides local create, read, update, and delete workflows,
-status summaries, an offline SQLite database, and a maintainable desktop architecture.
+Job Tracker 1.0 is a simple local-first desktop application for managing job
+applications. It runs from one Python codebase on Linux and Windows and requires no
+account, web server, or internet connection.
 
-## Technologies
+## Features
 
-- Python 3
-- CustomTkinter desktop GUI
-- SQLite local storage (through Python's standard library)
-- pytest
+- Create, view, edit, and delete applications with confirmation
+- Search company, position, and location; combine search with status filtering
+- Sort by company, position, status, date applied, or follow-up date
+- Summary counts for total applications, applied, interviews, and offers
+- Visual emphasis for overdue and today follow-ups
+- Open validated HTTP/HTTPS job-posting links in the default browser
+- Export all records to UTF-8 CSV
+- Create consistent SQLite backups and safely restore validated backups
+- Local diagnostic logging
 
-The application is designed to work offline on Linux and Windows. Windows support
-is a project requirement, but this version has not been runtime-tested on Windows.
+Application records never leave the computer. There is no analytics, telemetry,
+cloud synchronization, or external transmission. **Open Job Posting** is the only
+feature that intentionally launches an external website.
 
-## Project structure
+## Local data
 
-```text
-app/
-├── main.py                    # Application entry point
-├── config.py                  # Cross-platform local-data paths
-├── database.py                # SQLite schema and repository
-├── models.py                  # Domain model and statuses
-├── services/
-│   └── application_service.py # UI-facing application logic
-├── ui/
-│   └── main_window.py         # CustomTkinter window shell
-└── assets/                    # Future local visual assets
-tests/                         # Isolated pytest suite
-```
+The application automatically creates its data directory and keeps both the database
+and diagnostic log outside the source or executable directory:
 
-Application data is created outside the source tree. By default it is stored in
-`~/.local/share/JobTracker/job_tracker.db` on Linux (or under `XDG_DATA_HOME` when
-set) and `%LOCALAPPDATA%\JobTracker\job_tracker.db` on Windows.
+- Linux: `~/.local/share/JobTracker/` (or `$XDG_DATA_HOME/JobTracker/`)
+- Windows: `%LOCALAPPDATA%\JobTracker\`
+- Database: `job_tracker.db`
+- Log: `job_tracker.log`
 
-## Linux development setup
+Normal launches and upgrades do not overwrite existing records.
 
-Install Python 3, its virtual-environment support, and Tk. Package names vary by
-distribution; on Debian/Ubuntu these are commonly `python3`, `python3-venv`, and
-`python3-tk`.
+## Setup and development
 
-Create and activate a virtual environment:
+Python 3.12 is used for builds. Python 3, Tk, and virtual-environment support are
+required. On Debian/Ubuntu the relevant packages are commonly `python3`,
+`python3-tk`, and `python3-venv`.
+
+Linux:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
+python -m pip install -r requirements-dev.txt
 ```
 
-Install dependencies:
+Windows PowerShell:
 
-```bash
-python -m pip install -r requirements.txt
+```powershell
+py -3.12 -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements-dev.txt
 ```
 
-Run the desktop application:
+Run from source or run tests:
 
 ```bash
 python -m app.main
+python -m pytest -q
 ```
 
-Use **+ Add Application** to create a record. Select any row to inspect its full
-details or to edit or delete it. Dates are optional and, when provided, must use
-the `YYYY-MM-DD` format. Deletion always asks for confirmation.
+Dates use `YYYY-MM-DD`. Blank optional dates are valid.
 
-Run tests:
+## CSV and backups
+
+**Export All CSV** exports every persisted application, regardless of the active
+search or filter. The CSV includes URLs, notes, and timestamps and is encoded as
+UTF-8 with spreadsheet-compatible Unicode support.
+
+**Create Backup** uses SQLite's online backup API. **Restore Backup** first validates
+the selected database and schema, asks for confirmation, and creates a timestamped
+safety backup of current data before restoring.
+
+## Standalone builds
+
+Install the development requirements, then build on the target operating system:
 
 ```bash
-python -m pytest
+python -m PyInstaller --clean --noconfirm JobTracker.spec
 ```
+
+Linux produces `dist/JobTracker`; Windows produces `dist/JobTracker.exe`. PyInstaller
+does not cross-compile, so Windows builds must run on Windows. The included GitHub
+Actions workflow tests and builds the Windows executable and uploads it as a workflow
+artifact. Generated `build/` and `dist/` directories are intentionally ignored.
+
+The standalone executable continues using the per-user data locations above; it does
+not store the database beside the executable.

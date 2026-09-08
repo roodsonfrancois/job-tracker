@@ -7,7 +7,10 @@ import sys
 from pathlib import Path
 
 APP_NAME = "JobTracker"
+DISPLAY_NAME = "Job Tracker"
+APP_VERSION = "1.0.0"
 DATABASE_FILENAME = "job_tracker.db"
+LOG_FILENAME = "job_tracker.log"
 
 
 def get_app_data_dir(
@@ -39,3 +42,8 @@ def get_app_data_dir(
 def get_database_path(**kwargs: object) -> Path:
     """Return the path to the application's SQLite database."""
     return get_app_data_dir(**kwargs) / DATABASE_FILENAME
+
+
+def get_log_path(**kwargs: object) -> Path:
+    """Return the local diagnostic log path."""
+    return get_app_data_dir(**kwargs) / LOG_FILENAME

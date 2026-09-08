@@ -79,6 +79,48 @@ class JobApplicationRepository:
                 "SELECT * FROM job_applications ORDER BY created_at DESC, id DESC"
             ).fetchall()
 
+    def search(
+        self,
+        query: str = "",
+        status: str | None = None,
+        sort_by: str = "created_at",
+        descending: bool = True,
+    ) -> list[sqlite3.Row]:
+        sort_columns = {
+            "company": "company COLLATE NOCASE",
+            "position": "position COLLATE NOCASE",
+            "status": "status COLLATE NOCASE",
+            "date_applied": "date_applied",
+            "follow_up_date": "follow_up_date",
+            "created_at": "created_at",
+        }
+        if sort_by not in sort_columns:
+            raise ValueError(f"Unsupported sort field: {sort_by}")
+        conditions: list[str] = []
+        parameters: list[str] = []
+        query = query.strip()
+        if query:
+            conditions.append(
+                "(company LIKE ? COLLATE NOCASE OR position LIKE ? COLLATE NOCASE "
+                "OR location LIKE ? COLLATE NOCASE)"
+            )
+            pattern = f"%{query}%"
+            parameters.extend((pattern, pattern, pattern))
+        if status:
+            validate_status(status)
+            conditions.append("status = ?")
+            parameters.append(status)
+        where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+        direction = "DESC" if descending else "ASC"
+        column = sort_columns[sort_by]
+        with closing(sqlite3.connect(self.database_path)) as connection:
+            connection.row_factory = sqlite3.Row
+            return connection.execute(
+                f"SELECT * FROM job_applications {where} "
+                f"ORDER BY {column} {direction}, id DESC",
+                parameters,
+            ).fetchall()
+
     def get_by_id(self, application_id: int) -> sqlite3.Row | None:
         with closing(sqlite3.connect(self.database_path)) as connection:
             connection.row_factory = sqlite3.Row
@@ -128,3 +170,11 @@ class JobApplicationRepository:
         counts["Interviews"] = by_status.get("Interview", 0)
         counts["Offers"] = by_status.get("Offer", 0)
         return counts
+
+    def backup_to(self, destination: Path | str) -> Path:
+        destination = Path(destination)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        with closing(sqlite3.connect(self.database_path)) as source:
+            with closing(sqlite3.connect(destination)) as target:
+                source.backup(target)
+        return destination

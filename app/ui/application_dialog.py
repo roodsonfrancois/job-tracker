@@ -59,6 +59,8 @@ class ApplicationDialog(ctk.CTkToplevel):
         )
         ctk.CTkButton(buttons, text="Save", command=self._save).pack(side="left")
         self._populate()
+        self.bind("<Escape>", lambda _event: self._close())
+        self.bind("<Control-Return>", lambda _event: self._save())
         self._activate_modal()
 
     def _activate_modal(self) -> None:
@@ -91,6 +93,7 @@ class ApplicationDialog(ctk.CTkToplevel):
         )
         entry = ctk.CTkEntry(parent)
         entry.grid(row=row + 1, column=0, sticky="ew")
+        entry.bind("<Return>", lambda _event: self._save())
         self._entries[key] = entry
         return row + 2
 

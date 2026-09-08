@@ -12,8 +12,11 @@ class ApplicationService:
     def __init__(self, repository: JobApplicationRepository) -> None:
         self.repository = repository
 
-    def list_applications(self):
-        return self.repository.list_all()
+    def list_applications(
+        self, query: str = "", status: str | None = None,
+        sort_by: str = "created_at", descending: bool = True,
+    ):
+        return self.repository.search(query, status, sort_by, descending)
 
     def get_application(self, application_id: int):
         return self.repository.get_by_id(application_id)
