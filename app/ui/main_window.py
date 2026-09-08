@@ -4,14 +4,16 @@ from __future__ import annotations
 
 import logging
 import sqlite3
+import sys
 import webbrowser
 from datetime import date
 from pathlib import Path
+import tkinter as tk
 from tkinter import filedialog, messagebox
 
 import customtkinter as ctk
 
-from app.config import APP_VERSION, DISPLAY_NAME, get_app_data_dir
+from app.config import APP_NAME, APP_VERSION, DISPLAY_NAME, get_app_data_dir, get_icon_path
 from app.models import ALLOWED_STATUSES
 from app.services.application_service import ApplicationService
 from app.services.file_service import FileService
@@ -22,6 +24,11 @@ from app.ui.help_window import HelpWindow
 LOGGER = logging.getLogger(__name__)
 
 
+def icon_subsample_factor(width: int, height: int, maximum_size: int = 256) -> int:
+    """Return a Tk subsample factor that keeps the X11 icon reasonably sized."""
+    return max(1, (max(width, height) + maximum_size - 1) // maximum_size)
+
+
 class MainWindow(ctk.CTk):
     COLUMNS = (
         ("company", "Company"), ("position", "Position"), ("location", "Location"),
@@ -30,7 +37,7 @@ class MainWindow(ctk.CTk):
     )
 
     def __init__(self, service: ApplicationService) -> None:
-        super().__init__()
+        super().__init__(className=APP_NAME)
         self.service = service
         self.files = FileService(service.repository)
         self.selected_id: int | None = None
@@ -38,6 +45,12 @@ class MainWindow(ctk.CTk):
         self.sort_descending = True
         self.help_window: HelpWindow | None = None
         self.title(DISPLAY_NAME)
+        if sys.platform == "win32":
+            self._set_window_icon()
+        else:
+            self._icon_map_binding = self.bind(
+                "<Map>", self._set_linux_icon_after_map, add="+"
+            )
         self.geometry("1180x760")
         self.minsize(900, 600)
         self.grid_columnconfigure(0, weight=1)
@@ -48,6 +61,32 @@ class MainWindow(ctk.CTk):
         self._build_content()
         self.bind("<Delete>", lambda _event: self._delete_selected())
         self.refresh()
+
+    def _set_linux_icon_after_map(self, event) -> None:
+        """Apply the X11 icon once the CTk root has a mapped native window."""
+        if event.widget is not self:
+            return
+        self.unbind("<Map>", self._icon_map_binding)
+        self.update_idletasks()
+        self._set_window_icon()
+
+    def _set_window_icon(self) -> None:
+        """Set the platform-appropriate icon without making startup depend on it."""
+        try:
+            icon_path = get_icon_path()
+            if not icon_path.is_file():
+                raise FileNotFoundError(icon_path)
+            if icon_path.suffix.lower() == ".ico":
+                self.iconbitmap(str(icon_path))
+            else:
+                self._window_icon_source = tk.PhotoImage(file=str(icon_path))
+                factor = icon_subsample_factor(
+                    self._window_icon_source.width(), self._window_icon_source.height()
+                )
+                self._window_icon = self._window_icon_source.subsample(factor, factor)
+                self.iconphoto(True, self._window_icon)
+        except (FileNotFoundError, OSError, tk.TclError):
+            LOGGER.warning("Application icon could not be loaded", exc_info=True)
 
     def _build_header(self) -> None:
         header = ctk.CTkFrame(self, fg_color="transparent")

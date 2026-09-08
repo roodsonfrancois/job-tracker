@@ -17,3 +17,6 @@ dist/
 windows-build/
 JobTracker-Windows.zip
 JobTracker-v*-Windows.exe
+
+# Linux distribution artifacts
+JobTracker-v*-Linux-x86_64

@@ -1,6 +1,6 @@
 # Job Tracker
 
-Job Tracker 1.0 is a simple local-first desktop application for managing job
+Job Tracker 1.0.1 is a simple local-first desktop application for managing job
 applications. It runs from one Python codebase on Linux and Windows and requires no
 account, web server, or internet connection.
 
@@ -94,3 +94,14 @@ artifact. Generated `build/` and `dist/` directories are intentionally ignored.
 
 The standalone executable continues using the per-user data locations above; it does
 not store the database beside the executable.
+
+The PyInstaller build embeds the official ICO in Windows executables and bundles both
+the ICO and PNG so the application can set its window icon when run from source or as
+a bundled executable.
+
+For a future Linux package, place `JobTracker` on the executable search path (commonly
+`/usr/local/bin/JobTracker`), install `packaging/linux/jobtracker.desktop` as
+`/usr/local/share/applications/jobtracker.desktop`, and install the PNG as
+`/usr/local/share/pixmaps/jobtracker.png`. The launcher already refers to the icon by
+the theme name `jobtracker`. These are packaging instructions only; no system-wide
+installer is provided.

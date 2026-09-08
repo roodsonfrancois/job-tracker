@@ -8,7 +8,7 @@ from pathlib import Path
 
 APP_NAME = "JobTracker"
 DISPLAY_NAME = "Job Tracker"
-APP_VERSION = "1.0.0"
+APP_VERSION = "1.0.1"
 DATABASE_FILENAME = "job_tracker.db"
 LOG_FILENAME = "job_tracker.log"
 
@@ -47,3 +47,16 @@ def get_database_path(**kwargs: object) -> Path:
 def get_log_path(**kwargs: object) -> Path:
     """Return the local diagnostic log path."""
     return get_app_data_dir(**kwargs) / LOG_FILENAME
+
+
+def get_resource_path(relative_path: str | Path, *, frozen_root: Path | None = None) -> Path:
+    """Resolve a bundled resource when frozen, or a source-tree resource otherwise."""
+    bundle_root = frozen_root or getattr(sys, "_MEIPASS", None)
+    base = Path(bundle_root) if bundle_root else Path(__file__).resolve().parent.parent
+    return base / relative_path
+
+
+def get_icon_path(*, platform: str | None = None, frozen_root: Path | None = None) -> Path:
+    """Return the preferred application-window icon for the current platform."""
+    suffix = ".ico" if (platform or sys.platform) == "win32" else ".png"
+    return get_resource_path(f"app/assets/job_tracker_icon{suffix}", frozen_root=frozen_root)

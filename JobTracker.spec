@@ -2,7 +2,10 @@
 
 from PyInstaller.utils.hooks import collect_data_files
 
-datas = collect_data_files("customtkinter") + collect_data_files("tkcalendar")
+datas = collect_data_files("customtkinter") + collect_data_files("tkcalendar") + [
+    ("app/assets/job_tracker_icon.png", "app/assets"),
+    ("app/assets/job_tracker_icon.ico", "app/assets"),
+]
 
 analysis = Analysis(
     ["app/main.py"],
@@ -29,4 +32,5 @@ executable = EXE(
     strip=False,
     upx=True,
     console=False,
+    icon="app/assets/job_tracker_icon.ico",
 )
