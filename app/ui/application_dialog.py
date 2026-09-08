@@ -8,6 +8,7 @@ import tkinter as tk
 import customtkinter as ctk
 
 from app.models import ALLOWED_STATUSES, ApplicationStatus
+from app.ui.calendar_dialog import CalendarDialog
 
 
 class ApplicationDialog(ctk.CTkToplevel):
@@ -41,11 +42,15 @@ class ApplicationDialog(ctk.CTkToplevel):
         self.status = ctk.CTkOptionMenu(form, values=list(ALLOWED_STATUSES))
         self.status.grid(row=row + 1, column=0, sticky="ew")
         row += 2
-        for key, label in (
-            ("date_applied", "Date Applied (YYYY-MM-DD)"),
-            ("follow_up_date", "Follow-up Date (YYYY-MM-DD)"),
-        ):
-            row = self._add_entry(form, row, key, label)
+        row = self._add_date_entry(
+            form, row, "date_applied", "Date Applied",
+            "When you submitted the application. Optional; use YYYY-MM-DD.",
+        )
+        row = self._add_date_entry(
+            form, row, "follow_up_date", "Follow-up Date",
+            "When you plan to contact the employer. Optional; no automatic notification.",
+            allow_clear=True,
+        )
         ctk.CTkLabel(form, text="Notes", anchor="w").grid(
             row=row, column=0, pady=(10, 3), sticky="ew"
         )
@@ -96,6 +101,40 @@ class ApplicationDialog(ctk.CTkToplevel):
         entry.bind("<Return>", lambda _event: self._save())
         self._entries[key] = entry
         return row + 2
+
+    def _add_date_entry(self, parent, row: int, key: str, label: str,
+                        explanation: str, *, allow_clear: bool = False) -> int:
+        ctk.CTkLabel(parent, text=label, anchor="w").grid(
+            row=row, column=0, pady=(10, 1), sticky="ew"
+        )
+        ctk.CTkLabel(
+            parent, text=explanation, anchor="w", text_color=("gray40", "gray70")
+        ).grid(row=row + 1, column=0, pady=(0, 3), sticky="ew")
+        controls = ctk.CTkFrame(parent, fg_color="transparent")
+        controls.grid(row=row + 2, column=0, sticky="ew")
+        controls.grid_columnconfigure(0, weight=1)
+        entry = ctk.CTkEntry(controls, placeholder_text="YYYY-MM-DD")
+        entry.grid(row=0, column=0, padx=(0, 7), sticky="ew")
+        entry.bind("<Return>", lambda _event: self._save())
+        self._entries[key] = entry
+        ctk.CTkButton(
+            controls, text="Calendar", width=86,
+            command=lambda: CalendarDialog(
+                self, title=f"Select {label}", initial_value=entry.get(),
+                on_select=lambda value: self._replace_entry(entry, value),
+            ),
+        ).grid(row=0, column=1, padx=(0, 7) if allow_clear else 0)
+        if allow_clear:
+            ctk.CTkButton(
+                controls, text="Clear", width=58, fg_color="gray45",
+                command=lambda: self._replace_entry(entry, ""),
+            ).grid(row=0, column=2)
+        return row + 3
+
+    @staticmethod
+    def _replace_entry(entry: ctk.CTkEntry, value: str) -> None:
+        entry.delete(0, "end")
+        entry.insert(0, value)
 
     def _populate(self) -> None:
         if self._application is None:

@@ -1,1 +1,2 @@
 customtkinter>=5.2,<6
+tkcalendar>=1.6,<2

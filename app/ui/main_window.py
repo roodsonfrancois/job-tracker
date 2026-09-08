@@ -17,6 +17,7 @@ from app.services.application_service import ApplicationService
 from app.services.file_service import FileService
 from app.services.url_service import validate_job_url
 from app.ui.application_dialog import ApplicationDialog
+from app.ui.help_window import HelpWindow
 
 LOGGER = logging.getLogger(__name__)
 
@@ -35,6 +36,7 @@ class MainWindow(ctk.CTk):
         self.selected_id: int | None = None
         self.sort_by = "created_at"
         self.sort_descending = True
+        self.help_window: HelpWindow | None = None
         self.title(DISPLAY_NAME)
         self.geometry("1180x760")
         self.minsize(900, 600)
@@ -58,7 +60,8 @@ class MainWindow(ctk.CTk):
         actions.grid(row=0, column=1, sticky="e")
         for text, command in (
             ("Export All CSV", self._export_csv), ("Create Backup", self._create_backup),
-            ("Restore Backup", self._restore_backup), ("About", self._show_about),
+            ("Restore Backup", self._restore_backup), ("Help", self._show_help),
+            ("About", self._show_about),
         ):
             ctk.CTkButton(actions, text=text, width=105, command=command).pack(
                 side="left", padx=(0, 7)
@@ -388,3 +391,10 @@ class MainWindow(ctk.CTk):
             f"Job Tracker\nVersion {APP_VERSION}\n\nSimple local desktop job application tracker",
             parent=self,
         )
+
+    def _show_help(self) -> None:
+        if self.help_window is not None and self.help_window.winfo_exists():
+            self.help_window.lift()
+            self.help_window.focus_set()
+            return
+        self.help_window = HelpWindow(self)

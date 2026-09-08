@@ -2,7 +2,7 @@
 
 from PyInstaller.utils.hooks import collect_data_files
 
-datas = collect_data_files("customtkinter")
+datas = collect_data_files("customtkinter") + collect_data_files("tkcalendar")
 
 analysis = Analysis(
     ["app/main.py"],

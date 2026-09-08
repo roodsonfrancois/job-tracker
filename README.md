@@ -15,6 +15,8 @@ account, web server, or internet connection.
 - Export all records to UTF-8 CSV
 - Create consistent SQLite backups and safely restore validated backups
 - Local diagnostic logging
+- Visual calendar selection for application and follow-up dates
+- Complete offline Help available from the dashboard
 
 Application records never leave the computer. There is no analytics, telemetry,
 cloud synchronization, or external transmission. **Open Job Posting** is the only
@@ -62,6 +64,10 @@ python -m pytest -q
 ```
 
 Dates use `YYYY-MM-DD`. Blank optional dates are valid.
+Dates can be typed manually or selected with the Calendar button. Follow-up dates
+can be cleared directly from the application form. The in-application **Help** window
+documents fields, statuses, dashboard behavior, export, backup/restore, privacy, and
+troubleshooting without requiring an internet connection.
 
 ## CSV and backups
 
