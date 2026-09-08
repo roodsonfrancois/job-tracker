@@ -37,7 +37,7 @@ def test_log_path_and_version(tmp_path):
     assert get_log_path(
         platform="win32", environ={"LOCALAPPDATA": str(tmp_path)}
     ) == tmp_path / "JobTracker/job_tracker.log"
-    assert APP_VERSION == "1.0.1"
+    assert APP_VERSION == "1.0.2"
 
 
 def test_source_resource_and_icon_assets_exist():

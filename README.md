@@ -1,6 +1,6 @@
 # Job Tracker
 
-Job Tracker 1.0.1 is a simple local-first desktop application for managing job
+Job Tracker 1.0.2 is a simple local-first desktop application for managing job
 applications. It runs from one Python codebase on Linux and Windows and requires no
 account, web server, or internet connection.
 
@@ -94,6 +94,15 @@ artifact. Generated `build/` and `dist/` directories are intentionally ignored.
 
 The standalone executable continues using the per-user data locations above; it does
 not store the database beside the executable.
+
+### Windows installation
+
+Download `JobTracker-v1.0.2-Windows-Setup.exe` and run it as the current user. The
+installer adds a **Job Tracker** Start Menu shortcut and can optionally create a
+Desktop shortcut. Uninstall Job Tracker through **Windows Settings → Apps**.
+
+Installation files and user data are separate. Uninstalling the application does not
+remove the database or logs stored under `%LOCALAPPDATA%\JobTracker\`.
 
 The PyInstaller build embeds the official ICO in Windows executables and bundles both
 the ICO and PNG so the application can set its window icon when run from source or as

@@ -171,4 +171,4 @@ def test_restore_rejects_active_database_as_source(services, tmp_path):
 
 
 def test_version_is_v1():
-    assert APP_VERSION == "1.0.1"
+    assert APP_VERSION == "1.0.2"

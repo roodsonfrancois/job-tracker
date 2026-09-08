@@ -75,4 +75,4 @@ def test_help_contains_all_major_sections_and_centralized_version():
         "Follow-up Date", "Notes",
     ):
         assert field in combined
-    assert APP_VERSION == "1.0.1"
+    assert APP_VERSION == "1.0.2"
