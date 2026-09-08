@@ -12,3 +12,8 @@ dist/
 *.log
 .idea/
 .vscode/
+
+# Local distribution artifacts
+windows-build/
+JobTracker-Windows.zip
+JobTracker-v*-Windows.exe
